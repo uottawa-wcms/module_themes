@@ -1,0 +1,4 @@
+name = Module Themes
+description = "An API to allow modules to easily register themselves as
+providing theme components"
+core = 7.x

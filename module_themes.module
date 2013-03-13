@@ -1,0 +1,70 @@
+<?php
+
+/**
+ * Implements hook_theme_register_alter().
+ */
+function module_themes_theme_registry_alter(&$registry) {
+  $implementations = _module_themes_get_implementations();
+  foreach ($implementations as $module => $info) {
+    $path = drupal_get_path('module', $module);
+    if (!empty($info['template path'])) {
+      $path .= '/' . $info['template path'];
+    }
+    $theme_registry_copy = $theme_registry;
+    _theme_process_registry($theme_registry_copy, 'phptemplate', 'theme_engine', 'pow', $path);
+    $theme_registry += array_diff_key($theme_registry_copy, $theme_registry);
+    foreach ($info['hooks'] as $hook) {
+      _module_themes_insert_after_first_element(
+        $theme_registry[$hook]['theme paths'], $path
+      );
+    }
+  }
+}
+
+/**
+ * Helper function to add after first element
+ * @param array $array The array to operate on
+ * @param mixed $element The element to insert in position 2
+ */
+function _module_themes_insert_after_first_element(&$array, $element) {
+  if (is_array($array)) {
+    $first = array_shift($array);
+    array_unshift($array, $first, $element);
+  }
+}
+
+/**
+ * Retrieves a list of all modules that implement this API and the data
+ * associated with them.
+ *
+ * The inforomation returned is in the following format:
+ * - version: The API version this module implements
+ * - template path: The path to the templates folder
+ * - hooks: An array of theme hooks that this module provides implementations for
+ *
+ * @return array An array of module's theme implementation information
+ */
+function _module_themes_get_implementations() {
+  $results = drupal_static(__FUNCTION__);
+  if (empty($results)) {
+    $cached = cache_get(__FUNCTION__);
+    if (!empty($cached)) {
+      $results = $cached->data;
+    }
+    if (empty($results)) {
+      $modules = module_implements('module_themes_api');
+      $results = array();
+      foreach ($modules as $module) {
+        $hook = $module . '_module_themes_api';
+        if (function_exists($hook)) {
+          $info = $hook();
+          if ($info['version'] >= 1) {
+            $results[$module] = $info;
+          }
+        }
+      }
+      cache_set(__FUNCTION__, $results);
+    }
+  }
+  return $results;
+}
