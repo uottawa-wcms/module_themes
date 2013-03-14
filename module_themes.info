@@ -2,3 +2,9 @@ name = Module Themes
 description = "An API to allow modules to easily register themselves as
 providing theme components"
 core = 7.x
+
+; Information added by drush on 2013-03-14
+version = "unknown"
+project = "module_themes"
+datestamp = "1363270904"
+

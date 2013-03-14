@@ -3,7 +3,7 @@
 /**
  * Implements hook_theme_register_alter().
  */
-function module_themes_theme_registry_alter(&$registry) {
+function module_themes_theme_registry_alter(&$theme_registry) {
   $implementations = _module_themes_get_implementations();
   foreach ($implementations as $module => $info) {
     $path = drupal_get_path('module', $module);
